@@ -1,0 +1,108 @@
+﻿@page
+
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@*<div class="row">
+<div class="col-sm-5 col-md-5 text-center">
+    <h1 class="display-4" style="background-image: url('../img/tribhuwan university.png'); background-repeat: no-repeat; background-size: contain;">स्ववियु निर्वाचन</h1>
+</div>
+</div>*@
+@*<div class="row"><br /></div>*@
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <div class="row">
+        <div class="col-sm-4 col-md-4">
+            <div class="card text-center text-white bg-danger border-light">
+                <div class="card-body">
+                    <h3 class="card-title">@Html.DisplayNameFor(model => model.Summary.TotalCandidates)</h3>
+                    <h4 class="card-text">@Html.DisplayFor(model => model.Summary.TotalCandidates)</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4 col-md-4">
+            <div class="card text-center text-dark bg-light border-info">
+                <div class="card-body">
+                    <h3 class="card-title">@Html.DisplayNameFor(model => model.Summary.TotalVoters)</h3>
+                    <h4 class="card-text">@Html.DisplayFor(model => model.Summary.TotalVoters)</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4 col-md-4">
+            <div class="card text-center text-white bg-info border-light">
+                <div class="card-body">
+                    <h3 class="card-title">@Html.DisplayNameFor(model => model.Summary.TotalVotes)</h3>
+                    <h4 class="card-text">@Html.DisplayFor(model => model.Summary.TotalVotes)</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row"><br /></div>
+
+    <div class="row">
+        <div class="col-sm-6 col-md-6">
+            <div class="card text-white bg-info border-light">
+                <div class="card-body">
+                    <h3 class="card-title text-center">@Html.DisplayNameFor(model => model.Summary.PartySummaries)</h3>
+                    <hr />
+                    <div class="card-text">
+                        @foreach(var item in Model.Summary.PartySummaries)
+                        {
+                                <div class="d-flex flex-row justify-content-between">
+                                    <div class="h4">@Html.DisplayFor(model => item.PartyName)</div>
+                                    <div class="h4">@Html.DisplayFor(model => item.NumberOfVotes)</div>
+                                </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-6">
+            <div class="card text-white bg-danger border-light">
+                <div class="card-body">
+                    <h3 class="card-title text-center">@Html.DisplayNameFor(model => model.Summary.CampusSummaries)</h3>
+                    <hr />
+                    <h4 class="card-text">
+                        @foreach (var item in Model.Summary.CampusSummaries)
+                        {
+                            <div class="shadow shadow-sm p-3">
+                                <div class="text-dark fw-bold">@Html.DisplayFor(model => item.CampusName)</div>
+                                <br />
+                                @foreach (var party in item.PartySummary)
+                                {
+                                    <div class="d-flex flex-row justify-content-between">
+                                        <div class="h4">@Html.DisplayFor(model => party.PartyName)</div>
+                                        <div class="h4">@Html.DisplayFor(model => party.NumberOfVotes)</div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row p-4"></div>
+    <div class="row text-center p-5">
+        <div class="col-sm-2 col-md-2"></div>
+        <div class="col-sm-8 col-md-8">
+            <img class="img-fluid" src="~/img/swabiyu-image.jpg" />
+            <br /><br /><br />
+            <h3 class="text-danger">स्ववियु निर्वाचन आगामी चैत ५ गते देखि उपत्यकासहित देशभरका विश्वविद्यालय तथा सम्बद्ध क्याम्पसमा हुदैँछ ।</h3>
+        </div>
+        <div class="col-sm-2 col-md-2"></div>
+    </div>
+        
+}

@@ -1,0 +1,57 @@
+﻿@page
+@model VotingApp.Pages.VotingCandidates.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Candidate</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Candidate.Id" />
+            <div class="form-group">
+                <label asp-for="Candidate.Name" class="control-label"></label>
+                <input asp-for="Candidate.Name" class="form-control" />
+                <span asp-validation-for="Candidate.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Candidate.Colleges" class="control-label"></label>
+                @Html.DropDownListFor(model => model.Candidate.CollegeId, Model.Colleges, new {@class = "form-control form-select"})
+                <span asp-validation-for="Candidate.CollegeId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Candidate.PartyId" class="control-label"></label>
+                @Html.DropDownListFor(model => model.Candidate.PartyId, Model.Parties, new {@class = "form-control form-select"})
+                @*<select asp-for="Candidate.PartyId" class="form-control" asp-items="ViewBag.PartyId"></select>*@
+                <span asp-validation-for="Candidate.PartyId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Candidate.PositionId" class="control-label"></label>
+                @Html.DropDownListFor(model => model.Candidate.PositionId, Model.Positions, new {@class = "form-control form-select"})
+                @*<select asp-for="Candidate.PositionId" class="form-control" asp-items="ViewBag.PositionId"></select>*@
+                <span asp-validation-for="Candidate.PositionId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Candidate.Symbol" class="control-label"></label>
+                <input asp-for="Candidate.Symbol" class="form-control" />
+                <span asp-validation-for="Candidate.Symbol" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

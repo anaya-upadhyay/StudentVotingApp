@@ -1,0 +1,82 @@
+﻿@page
+@model VotingApp.Pages.Votes.CreateModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>अाफुलार्इ मन परेकाे उम्मेदवार लार्इ मत खसाल्नुहाेस् ।</h1>
+
+<h4>भाेट खसाल्नुहाेस्</h4>
+<hr />
+<div class="row d-flex justify-content-center">
+    <div class="col-md-6">
+        <form method="post">
+            <table class="table table-borderless table-hover table-responsive-sm">
+                <thead class="border-bottom border-light">
+                    <tr>
+                        <th class="h3 bg-success bg-opacity-25" scope="col">पद</th>
+                        <th class="h3 bg-success bg-opacity-50" scope="col">उम्मेदवार</th>
+                        <th class="h3 bg-success bg-opacity-75 text-center" scope="col">मतदान</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.VotingLayout.Count(); i++) 
+                    {
+                    <tr class="border-bottom border-light">
+                        <td scope="row" class="bg-info bg-opacity-25 align-middle h5">
+                            @Html.HiddenFor(item => Model.VotingLayout[i].PositionId)
+                            @Html.DisplayFor(item => Model.VotingLayout[i].PositionName)
+                        </td>
+                        <td class="bg-info bg-opacity-50">
+                            @*@foreach (var candidate in Model.VotingLayout[i].Candidates)*@
+                            @for(int j = 0; j < Model.VotingLayout[i].Candidates.Count(); j++)
+                            {
+                                @Html.HiddenFor(item => Model.VotingLayout[i].Candidates[j].Id)
+                                @Html.DisplayFor(item => Model.VotingLayout[i].Candidates[j].Symbol)
+                                <br />
+                            }
+                        </td>
+                        <td class="bg-info bg-opacity-75 text-center text-lg-center">
+                            @*@foreach (var candidate in Model.VotingLayout[i].Candidates)*@
+                                @for (int j = 0; j < Model.VotingLayout[i].Candidates.Count(); j++)
+                                {
+                                    @Html.HiddenFor(item => Model.VotingLayout[i].Candidates[j].Symbol)    
+
+                                    @Html.RadioButtonFor(m => m.SelectedOptions[Model.VotingLayout[i].PositionId.ToString()], Model.VotingLayout[i].Candidates[j].Symbol, new { id = Model.VotingLayout[i].Candidates[j].Id.ToString()})
+
+                                <br />
+                            }
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+            @*<span id="lblMessage" style="display: none; color: Red;">Please select one option</span><br />*@
+            <input type="submit" id="btnSave" value="Submit Vote" class="btn btn-success bg-opacity-50" />
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    @*<script type="text/javascript">
+        $(function () {
+            $('#btnSave').on('click', function () {
+                $('#lblMessage').hide();
+                var isValid;
+                if ($('.form-check-input:checked').length > 0) {
+                    isValid = true;
+                } else {
+                    $('#lblMessage').show();
+                    isValid = false;
+                }
+                
+                console.log(isValid);
+
+                if(!isValid) return;
+            });
+        });
+    </script>*@
+}
