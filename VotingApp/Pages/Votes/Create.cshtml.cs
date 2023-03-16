@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 using NuGet.Packaging;
 
@@ -26,7 +27,7 @@ namespace VotingApp.Pages.Votes
             _userManager = userManager;
         }
 
-        public IActionResult OnGet()
+        public async Task<IActionResult> OnGet()
         {
             var signedInUser = _userManager.GetUserId(User);
             if (signedInUser == null)
@@ -34,36 +35,42 @@ namespace VotingApp.Pages.Votes
                 return Page();
             }
 
-            var votes = _context.Vote.Where(p => p.VotedBy == signedInUser).Select(p => p.CandidateId).ToList();
+            #region Move the following into a separate method - Commented now
 
-            var result = (from party in _context.Positions
-                          select new LayoutDto
-                          {
-                              PositionId = party.Id,
-                              PositionName = party.DisplayName,
-                              Candidates = (from candidate in _context.Candidate.Where(p => p.PartyId == party.Id)
-                                            join vote in _context.Vote.Where(p => p.VotedBy == signedInUser) 
-                                            on candidate.Id equals vote.CandidateId into voteLeft
-                                            from vote in voteLeft.DefaultIfEmpty()
-                                            select new CandidateDto
-                                            {
-                                                Id = candidate.Id,
-                                                Symbol = candidate.Symbol,
-                                                IsVoted = vote != null && (vote.CandidateId == candidate.Id)
-                                            }).ToList()
-                          }).ToList();
+            //var votes = _context.Vote.Where(p => p.VotedBy == signedInUser).Select(p => p.CandidateId).ToList();
 
-            VotingLayout.AddRange(result);
+            //var result = (from party in _context.Positions
+            //              select new LayoutDto
+            //              {
+            //                  PositionId = party.Id,
+            //                  PositionName = party.DisplayName,
+            //                  Candidates = (from candidate in _context.Candidate.Where(p => p.PartyId == party.Id)
+            //                                join vote in _context.Vote.Where(p => p.VotedBy == signedInUser)
+            //                                on candidate.Id equals vote.CandidateId into voteLeft
+            //                                from vote in voteLeft.DefaultIfEmpty()
+            //                                select new CandidateDto
+            //                                {
+            //                                    Id = candidate.Id,
+            //                                    Symbol = candidate.Symbol,
+            //                                    IsVoted = vote != null && (vote.CandidateId == candidate.Id)
+            //                                }).ToList()
+            //              }).ToList();
 
-            var myVotes = result.Select(p => new
-            {
-                PositionId = p.PositionId.ToString(),
-                CandidateSymbol = p.Candidates.FirstOrDefault(x => votes.Contains(x.Id)) == null
-                                ? ""
-                                : p.Candidates.First(x => votes.Contains(x.Id)).Symbol
-            }).ToList();
+            //VotingLayout.AddRange(result);
 
-            SelectedOptions = myVotes.ToDictionary(x => x.PositionId, x => x.CandidateSymbol);
+            //var myVotes = result.Select(p => new
+            //{
+            //    PositionId = p.PositionId.ToString(),
+            //    CandidateSymbol = p.Candidates.FirstOrDefault(x => votes.Contains(x.Id)) == null
+            //                    ? ""
+            //                    : p.Candidates.First(x => votes.Contains(x.Id)).Symbol
+            //}).ToList();
+
+            //SelectedOptions = myVotes.ToDictionary(x => x.PositionId, x => x.CandidateSymbol);       
+
+            #endregion
+
+            await LoadVotingLayout(signedInUser);
 
             return Page();
         }
@@ -77,15 +84,9 @@ namespace VotingApp.Pages.Votes
         [BindProperty]
         public Dictionary<string, string> SelectedOptions { get; set; }
 
-
         // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
         public async Task<IActionResult> OnPostAsync()
         {
-            //if (!ModelState.IsValid || _context.Vote == null || VotingLayout == null)
-            //{
-            //    return Page();
-            //}
-
             DateTime votedAt = DateTime.Now;
 
             //_context.Vote.RemoveRange(_context.Vote.ToList());
@@ -96,6 +97,18 @@ namespace VotingApp.Pages.Votes
             var signedInUser = _userManager.GetUserId(User);
             if(signedInUser == null)
             {
+                return Page();
+            }
+
+            var hasVoted = _context.Vote.Any(p => p.VotedBy == signedInUser);
+
+            if (hasVoted)
+            {
+                ViewData["MessageColor"] = "red";
+                ViewData["VotingMessage"] = "Your vote has already been submitted";
+
+                await LoadVotingLayout(signedInUser);
+
                 return Page();
             }
 
@@ -124,7 +137,44 @@ namespace VotingApp.Pages.Votes
 
             await _context.SaveChangesAsync();
 
-            return RedirectToPage("/Index");
+            ViewData["MessageColor"] = "green";
+            ViewData["VotingMessage"] = "Your vote has been submitted";
+
+            await LoadVotingLayout(signedInUser);
+            return Page();
+            //return RedirectToPage("/Index");
+        }
+
+        private async Task LoadVotingLayout(string signedInUser)
+        {
+            VotingLayout.Clear();
+
+            var votes = await _context.Vote.Where(p => p.VotedBy == signedInUser).Select(p => p.CandidateId).ToListAsync();
+
+            var result = await (from party in _context.Positions
+                          select new LayoutDto
+                          {
+                              PositionId = party.Id,
+                              PositionName = party.DisplayName,
+                              Candidates = (from candidate in _context.Candidate.Where(p => p.PartyId == party.Id)
+                                            select new CandidateDto
+                                            {
+                                                Id = candidate.Id,
+                                                Symbol = candidate.Symbol
+                                            }).ToList()
+                          }).ToListAsync();
+
+            VotingLayout.AddRange(result);
+
+            var myVotes = result.Select(p => new
+            {
+                PositionId = p.PositionId.ToString(),
+                CandidateSymbol = p.Candidates.FirstOrDefault(x => votes.Contains(x.Id)) == null
+                                ? ""
+                                : p.Candidates.First(x => votes.Contains(x.Id)).Symbol
+            }).ToList();
+
+            SelectedOptions = myVotes.ToDictionary(x => x.PositionId, x => x.CandidateSymbol);
         }
     }
 }

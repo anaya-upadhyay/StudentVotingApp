@@ -54,6 +54,8 @@
             </table>
             @*<span id="lblMessage" style="display: none; color: Red;">Please select one option</span><br />*@
             <input type="submit" id="btnSave" value="Submit Vote" class="btn btn-success bg-opacity-50" />
+
+            <span id="lblMessage" style="display:block; color:@ViewData["MessageColor"];">@ViewData["VotingMessage"]</span>
         </form>
     </div>
 </div>
